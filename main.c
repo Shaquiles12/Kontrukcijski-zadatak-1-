@@ -1,4 +1,4 @@
-ï»¿#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,14 +7,18 @@
 #include "knjiznica.h"
 
 /*
- * main.c â€“ Ulazna tocka programa "Skladiste knjiÅ¾nice"
+ * main.c — Ulazna tocka programa "Skladiste knjiznice"
  *
- * Pokrece glavni izbornik i pri izlasku cisti sve dinamicki
- * alocirane resurse (povezana lista â€“ povijest pretrage).
+ * Koncepti u ovoj datoteci:
+ *  - switch na typedef enum    : switch((OpcijaMenua)odabir) — glavni izbornik
+ *  - Inicijalno ucitavanje     : postavlja sljedeci_id na max(id) + 1 pri pokretanju
+ *  - SLOBODNA_MEMORIJA makro   : sigurno oslobadanje privremenog pokazivaca pri init
+ *  - oslobodi_povijest()       : ciscenje cijele povezane liste pri izlasku programa
+ *  - do-while petlja           : glavni loop programa sve dok korisnik ne odabere izlaz
  */
 
 int main(void) {
-    /* Inicijalno ucitavanje â€“ postavlja sljedeci_id na max(id)+1 */
+    /* Inicijalno ucitavanje – postavlja sljedeci_id na max(id)+1 */
     {
         Knjiga* tmp = NULL;
         int n = ucitaj_sve(&tmp);

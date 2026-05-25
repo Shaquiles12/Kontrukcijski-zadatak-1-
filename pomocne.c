@@ -1,10 +1,19 @@
-ï»¿#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "knjiznica.h"
 
-/* pomocne.c - Pomocne funkcije: ispis, unos, izbornik */
+/*
+ * pomocne.c — Pomocne funkcije: ispis, unos i izbornik
+ *
+ * Koncepti u ovoj datoteci:
+ *  - static niz (lokalni u funk.) : static const char* nazivi[] u vrsta_u_string()
+ *  - PROVJERI_NULL makro          : zastita pokazivaca u citaj_redak() i ispisi_knjigu()
+ *  - fgets / strcspn              : sigurno citanje retka bez prekoracenja buffera
+ *  - printf formatiranje          : ispis tablice knjiga s poravnanjem (%-30s, %-4d, ...)
+ *  - Parametri funkcija           : const Knjiga* k — zastita od nenamjerne izmjene
+ */
 
 const char* vrsta_u_string(VrstaKnjige v) {
     static const char* nazivi[VRSTA_COUNT] = {

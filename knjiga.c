@@ -6,19 +6,36 @@
 #include <ctype.h>
 #include "knjiznica.h"
 
-/* knjiga.c - CRUID operacije: dodaj, ispisi, provjeri, azuriraj, obrisi */
+/*
+ * knjiga.c — CRUID operacije nad strukturom Knjiga
+ *
+ * Koncepti u ovoj datoteci:
+ *  - Create                    : dodaj_knjigu() — dodaje zapis u memoriju i sprema datoteku
+ *  - Read                      : ispisi_sve_knjige() — cita i ispisuje sve zapise
+ *  - Read                      : provjeri_dostupnost() — trazi zapis po ID-u
+ *  - Update                    : azuriraj_knjigu() — mijenja polja postojeceg zapisa
+ *  - Delete                    : obrisi_knjigu() — uklanja zapis, pise datoteku iznova
+ *  - Pokazivaci na strukture   : Knjiga* knjige, Knjiga* k = &knjige[indeks]
+ *  - realloc (preko dodaj_u_niz): prosiruje niz knjiga pri dodavanju nove knjige
+ *  - calloc / SLOBODNA_MEMORIJA: alokacija i sigurno oslobadanje niza knjiga
+ *  - errno / strerror          : ispis greske pri fopen
+ *  - PROVJERI_NULL makro       : zastita pokazivaca
+ *  - typedef enum cast         : (VrstaKnjige)vrsta_unos — provjera raspona
+ *  - tolower()                 : normalizacija unosa potvrde brisanja (d/n)
+ */
 
 void dodaj_knjigu(void) {
     Knjiga nova;
     memset(&nova, 0, sizeof(Knjiga));
     nova.id = sljedeci_id++;
 
-    printf("\n─── DODAJ NOVU KNJIGU ───────────────────\n");
+    printf("\n--- DODAJ NOVU KNJIGU -------------------\n");
 
     printf("Naziv: ");
     citaj_redak(nova.naziv, MAX_NAZIV);
     if (strlen(nova.naziv) == 0) {
         printf("[GRESKA] Naziv ne smije biti prazan.\n");
+        sljedeci_id--;
         return;
     }
 
@@ -26,6 +43,7 @@ void dodaj_knjigu(void) {
     citaj_redak(nova.autor, MAX_AUTOR);
     if (strlen(nova.autor) == 0) {
         printf("[GRESKA] Autor ne smije biti prazan.\n");
+        sljedeci_id--;
         return;
     }
 
@@ -38,6 +56,7 @@ void dodaj_knjigu(void) {
         vrsta_unos < 0 || vrsta_unos >= VRSTA_COUNT) {
         printf("[GRESKA] Neispravna vrsta.\n");
         ocisti_buffer();
+        sljedeci_id--;
         return;
     }
     ocisti_buffer();
@@ -47,22 +66,30 @@ void dodaj_knjigu(void) {
     if (scanf("%d", &nova.godina_izdanja) != 1) {
         printf("[GRESKA] Neispravna godina.\n");
         ocisti_buffer();
+        sljedeci_id--;
         return;
     }
     ocisti_buffer();
     nova.dostupno = 1;
 
-    FILE* fp = fopen(DATOTEKA, "ab");
-    if (fp == NULL) {
-        fprintf(stderr, "[GRESKA] fopen (dodaj): %s\n", strerror(errno));
+    /* Ucitaj postojeci niz, prosiri ga pomocu realloc (dodaj_u_niz), spremi */
+    Knjiga* knjige = NULL;
+    int n = ucitaj_sve(&knjige);
+    if (n < 0) {
+        printf("[GRESKA] Citanje datoteke nije uspjelo.\n");
         return;
     }
-    if (fwrite(&nova, sizeof(Knjiga), 1, fp) != 1)
-        fprintf(stderr, "[GRESKA] fwrite: %s\n", strerror(errno));
-    else
+
+    Knjiga* prosireni = dodaj_u_niz(knjige, n, &nova);
+    if (prosireni == NULL) {
+        SLOBODNA_MEMORIJA(knjige);
+        return;
+    }
+
+    if (spremi_sve(prosireni, n + 1) == 0)
         printf("[OK] Knjiga '%s' dodana s ID=%d.\n", nova.naziv, nova.id);
 
-    fclose(fp);
+    SLOBODNA_MEMORIJA(prosireni);
 }
 
 void ispisi_sve_knjige(void) {

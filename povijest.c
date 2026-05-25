@@ -4,7 +4,19 @@
 #include <string.h>
 #include "knjiznica.h"
 
-/* povijest.c - Jednostruko povezana lista: povijest pretrage */
+/*
+ * povijest.c — Jednostruko povezana lista: povijest pretrage
+ *
+ * Koncepti u ovoj datoteci:
+ *  - Jednostruko povezana lista : CvorPovijesti — svaki cvor cuva upit i broj rezultata
+ *  - Dodavanje na pocetak liste : dodaj_povijest() — novi cvor postaje nova glava
+ *  - malloc()                   : dinamicka alokacija novog cvora
+ *  - SLOBODNA_MEMORIJA makro    : sigurno free() + NULL pri oslobadanju cvora
+ *  - Rekurzija                  : ispisi_cvor_rekurzivno() — rekurzivni ispis liste
+ *  - static funkcija            : ispisi_cvor_rekurzivno() — vidljiva samo unutar ovog fajla
+ *  - extern CvorPovijesti*      : definicija globalne varijable povijest_pretrage (dekl. u .h)
+ *  - Oslobadanje cijele liste   : oslobodi_povijest() — poziva main.c pri izlasku programa
+ */
 
 CvorPovijesti* povijest_pretrage = NULL;
 

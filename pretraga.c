@@ -4,11 +4,24 @@
 #include <string.h>
 #include "knjiznica.h"
 
-/* pretraga.c - Komparatori, pretraga i sortiranje */
+/*
+ * pretraga.c — Komparatori, pretraga i sortiranje
+ *
+ * Koncepti u ovoj datoteci:
+ *  - qsort()                   : sortiranje niza Knjiga po naslovu, autoru ili vrsti
+ *  - bsearch()                 : brzo binarno pretrazivanje po tocnom naslovu
+ *  - Komparatori               : cmp_naslov(), cmp_autor(), cmp_vrsta() — za qsort/bsearch
+ *  - Pokazivaci na funkcije    : komparatori se predaju kao void* pokazivaci u qsort/bsearch
+ *  - strstr()                  : substring pretraga po naslovu i autoru
+ *  - static lokalna varijabla  : static int ukupno_pretraga — broji pretrage kroz cijelu sesiju
+ *  - snprintf()                : formatiranje stringa pretrage za povijest
+ *  - SLOBODNA_MEMORIJA makro   : sigurno oslobadanje niza knjiga
+ *  - Jednostruko pov. lista    : dodaj_povijest() — sprema svaki upit u povijest pretrage
+ */
 
-/* ═══════════════════════════════════════════════════════════════
- *  KOMPARATORI za qsort / bsearch
- * ═══════════════════════════════════════════════════════════════ */
+ /* ═══════════════════════════════════════════════════════════════
+  *  KOMPARATORI za qsort / bsearch
+  * ═══════════════════════════════════════════════════════════════ */
 
 int cmp_naslov(const void* a, const void* b) {
     return strcmp(((const Knjiga*)a)->naziv,

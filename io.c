@@ -5,9 +5,42 @@
 #include <errno.h>
 #include "knjiznica.h"
 
-/* io.c - Datotecni I/O: ucitaj_sve, spremi_sve */
+/*
+ * io.c — Datotecni I/O: citanje i pisanje binarne datoteke
+ *
+ * Koncepti u ovoj datoteci:
+ *  - Binarna datoteka          : fopen("rb"), fopen("wb"), fopen("ab")
+ *  - fread / fwrite            : citanje i pisanje zapisa tipa Knjiga
+ *  - fseek / ftell / rewind    : odredivanje velicine datoteke pri ucitavanju
+ *  - ferror / feof             : provjera gresaka i kraja datoteke
+ *  - calloc()                  : alokacija niz-a Knjiga, inicijalizira na nulu
+ *  - realloc()                 : prosirenje niza Knjiga u dodaj_u_niz()
+ *  - SLOBODNA_MEMORIJA         : sigurno free() + NULL nakon greske
+ *  - errno / strerror / perror : rukovanje greskama pri fopen, fseek, ftell, fread, fwrite
+ *  - remove / rename           : backup stare datoteke prije pisanja nove
+ *  - extern int sljedeci_id    : definicija globalne varijable (deklarirana u .h)
+ *  - Pokazivac na pokazivac    : Knjiga** out — punjenje pokazivaca iz funkcije
+ *  - PROVJERI_NULL_RET makro   : zastita ulaznih pokazivaca
+ */
 
 int sljedeci_id = 1;
+
+/*
+ * dodaj_u_niz – prosiruje dinamicki niz knjiga za jedan element pomocu realloc().
+ * Vraca novi pokazivac na niz, ili NULL ako realloc nije uspio.
+ * Koristi se u knjiga.c pri dodavanju knjige u memoriju prije pohrane.
+ */
+Knjiga* dodaj_u_niz(Knjiga* niz, int trenutni_n, const Knjiga* nova) {
+    PROVJERI_NULL_RET(nova, "dodaj_u_niz: nova je NULL", NULL);
+
+    Knjiga* prosireni = realloc(niz, (size_t)(trenutni_n + 1) * sizeof(Knjiga));
+    if (prosireni == NULL) {
+        fprintf(stderr, "[GRESKA] realloc nije uspio: %s\n", strerror(errno));
+        return NULL;
+    }
+    prosireni[trenutni_n] = *nova;
+    return prosireni;
+}
 
 int ucitaj_sve(Knjiga** out) {
     PROVJERI_NULL_RET(out, "ucitaj_sve: out je NULL", -1);
